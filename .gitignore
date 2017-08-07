@@ -1,0 +1,21 @@
+
+# 忽略所有目录下的build目录,不忽略build文件
+build/
+
+
+# 忽略当前目录下的.gradle目录和.idea目录
+/.gradle/
+/.idea/
+
+
+# 忽略当前目录下的local.properties文件和local.properties目录、captures文件和captures目录
+/local.properties
+/captures
+
+
+.externalNativeBuild
+.DS_Store
+*.DS_Store
+*.iml
+*.keystore
+*.apk
