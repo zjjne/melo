@@ -8,10 +8,10 @@ package com.goteny.melo.http;
 public final class HttpUrl
 {
 
-    private String scheme;      //协议，"http"或"https"
-    private String host;        //主机, ip或域名
+    private String scheme = "";      //协议，"http"或"https"
+    private String host = "";        //主机, ip或域名
     private int port;           //端口，取值区间[1,65535]
-    private String path;        //路径，域名:端口后面那一坨
+    private String path = "";        //路径，域名:端口后面那一坨
 
 
 
@@ -76,14 +76,43 @@ public final class HttpUrl
         //将正规url拆分成协议、域名、端口、路径
 
         int schemeSplit = url.indexOf("://");
-        int hostSplit = url.indexOf("/", schemeSplit + 3);
-        int portIndex = url.indexOf(":", schemeSplit);
+        int hostSplit;
+        int portIndex;
 
-        scheme = url.substring(0, schemeSplit);
-        host = url.substring(schemeSplit + 3, hostSplit);   //此时Host可能会包含端口号
-        path = url.substring(hostSplit);
+        if (schemeSplit >= 0)       //有协议
+        {
+            scheme = url.substring(0, schemeSplit);
 
-        if (portIndex > 0)
+            hostSplit = url.indexOf("/", schemeSplit + 3);
+            portIndex = url.indexOf(":", schemeSplit + 3);
+        }else {
+            scheme = "http";
+
+            hostSplit = url.indexOf("/");
+            portIndex = url.indexOf(":");
+        }
+
+        if (hostSplit >= 0)     //中间或末尾有斜杠/
+        {
+            if (schemeSplit >= 0)   //有协议
+            {
+                host = url.substring(schemeSplit + 3, hostSplit);   //此时Host可能会包含端口号
+            }else {
+                host = url.substring(0, hostSplit);   //此时Host可能会包含端口号
+            }
+
+            path = url.substring(hostSplit + 1);
+        }else {
+            if (schemeSplit >= 0)   //有协议
+            {
+                host = url.substring(schemeSplit + 3);   //此时Host可能会包含端口号
+            }else {
+                host = url;   //此时Host可能会包含端口号
+            }
+        }
+
+
+        if (portIndex >= 0)     //有端口号
         {
             String[] strings = host.split(":");
             host = strings[0];
