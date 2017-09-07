@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 17090622
-        versionName "0.1.2"
+        versionCode 17090718
+        versionName "0.1.3"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -49,7 +49,7 @@ publish {
     artifactId = 'http'                         //package包(库)的id(标识)
     repoName = 'melo'                           //已经在jcenter中创建的仓库名，如果不设置，默认为'maven'
     uploadName = 'com.goteny.melo:http'         //展示在jcenter中的package包(库)名字，如果不设置，默认为artifactId的值
-    publishVersion = '0.1.2'                    //package包(库)的版本
+    publishVersion = '0.1.3'                    //package包(库)的版本
     desc = 'android http util'                  //库的描述
     website = 'https://github.com/zjjne/melo'   //库的相关网址
     bintrayUser = bintrayUserVal                //上面task中读取到的jcenterName

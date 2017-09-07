@@ -1,5 +1,7 @@
 package com.goteny.melo.http;
 
+import android.util.Log;
+
 /**
  *
  * Created by Jankey on 2017/8/2.
@@ -92,6 +94,7 @@ public final class HttpUrl
             portIndex = url.indexOf(":");
         }
 
+
         if (hostSplit >= 0)     //中间或末尾有斜杠/
         {
             if (schemeSplit >= 0)   //有协议
@@ -115,9 +118,15 @@ public final class HttpUrl
         if (portIndex >= 0)     //有端口号
         {
             String[] strings = host.split(":");
+
             host = strings[0];
             port = Integer.parseInt(strings[1]);
         }
+
+
+        Log.i(getClass().getSimpleName(), "---------------------------------------------------------------------------");
+        Log.i(getClass().getSimpleName(), "scheme【" + scheme + "】-" + "host【" + host + "】-"+ "port【" + port + "】-"+ "path【" + path + "】");
+        Log.i(getClass().getSimpleName(), "---------------------------------------------------------------------------");
     }
 
 

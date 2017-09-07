@@ -1,6 +1,7 @@
 package com.goteny.melo.http;
 
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.goteny.melo.http.annotations.Api;
@@ -117,13 +118,17 @@ public class RequestHandler
         Log.i("HttpProxy", "hostStr: " + hostStr);
 
         String apiStr = (api == null || api.value() == null)? "" : api.value();
-        hostStr = (hostStr.trim().equals(""))? "" : (hostStr + "/");
 
-        //正则表达式，替换字符串末尾的所有"/"符号为单个"/"   如"////"会替换为"/"
-        hostStr = (!hostStr.trim().equals(""))? hostStr.replaceAll("/+$", "/") : "";
+        if (!TextUtils.isEmpty(apiStr))
+        {
+            hostStr = (hostStr.trim().equals(""))? "" : (hostStr + "/");
 
-        //正则表达式，判断字符串开头是否含有"http://"或"https://"，不含则添加"http://"到字符串前面
-        hostStr = (!hostStr.trim().equals("") && !hostStr.matches("^http://") && !hostStr.matches("^https://"))? ("http://" + hostStr) : "";
+            //正则表达式，替换字符串末尾的所有"/"符号为单个"/"   如"////"会替换为"/"
+            hostStr = (!hostStr.trim().equals(""))? hostStr.replaceAll("/+$", "/") : "";
+        }
+
+        //正则表达式，判断字符串开头是否含有"http://" "https://" "HTTP://" "HTTPS://"，不含则添加"http://"到字符串前面
+        hostStr = (!hostStr.trim().equals("") && !hostStr.matches("^(?:http|https|HTTP|HTTPS)://\\S+$"))? ("http://" + hostStr) : "";
 
         String url = hostStr + apiStr;
 
