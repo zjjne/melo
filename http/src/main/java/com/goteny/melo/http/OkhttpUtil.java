@@ -8,6 +8,7 @@ import com.goteny.melo.http.enums.RequestTypes;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,10 +70,14 @@ public class OkhttpUtil implements IHttpCore
             @Override
             public List<Cookie> loadForRequest(HttpUrl url)
             {
+                List<Cookie> cookies = null;
+                
                 if (mCookieStore.isEnableCookies(url.toString()))
-                    return mCookieStore.getCookies(url.host());
-                else
-                    return null;
+                    cookies = mCookieStore.getCookies(url.host());
+                
+                if (cookies == null) cookies = new ArrayList<>();
+                
+                return cookies;
             }
         });
 
