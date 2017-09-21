@@ -1,10 +1,13 @@
 package com.goteny.melo.http;
 
 import android.support.v4.util.LongSparseArray;
-import android.util.Log;
 
 import com.goteny.melo.http.enums.MediaTypes;
 import com.goteny.melo.http.enums.RequestTypes;
+import com.goteny.melo.http.interfaces.CoreCookieCallback;
+import com.goteny.melo.http.interfaces.CoreHttpCallback;
+import com.goteny.melo.http.interfaces.IHttpCore;
+import com.goteny.melo.utils.log.LogMelo;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,7 +66,13 @@ public class OkhttpUtil implements IHttpCore
                 if (mCookieStore.isEnableCookies(url.toString()))
                 {
                     if (cookies != null && !cookies.isEmpty())
+                    {
                         mCookieStore.addCookies(url.host(), cookies);
+
+                        CoreCookieCallback coreCookieCallback = getCoreCookieCallback(url.toString());
+
+                        if (coreCookieCallback != null) coreCookieCallback.cookies(cookies);
+                    }
                 }
             }
 
@@ -81,16 +90,6 @@ public class OkhttpUtil implements IHttpCore
             }
         });
 
-//        builder.addInterceptor(new Interceptor()
-//        {
-//            public okhttp3.Response intercept(Chain chain) throws IOException
-//            {
-//                okhttp3.Request request = chain.request();
-//                okhttp3.Response response = chain.proceed(request);
-//                return response;
-//            }
-//        });
-
         return builder;
     }
 
@@ -102,41 +101,52 @@ public class OkhttpUtil implements IHttpCore
                 .writeTimeout(timeout, TimeUnit.MILLISECONDS);
         return builder;
     }
+    
+    
 
 
     @Override
-    public void send(Request request, HttpCoreCallback coreCallback)
+    public void send(Request request, CoreCallbakcs callbakcs)
     {
         mCookieStore.addUrl(request.getUrl().toString(), request.isEnableCookies());
 
+        if (callbakcs != null)
+        {
+            mCallbackStore.addCallbacks(request.getUrl().toString(), callbakcs);
+        }
+
         if (request.getRequestType() == RequestTypes.GET)
-            get(request, coreCallback);
+            get(request);
         else
-            post(request, coreCallback);
+            post(request);
     }
 
-    public void get(Request request, HttpCoreCallback coreCallback)
+
+
+    private void get(Request request)
     {
         String url = request.getUrl().toString();
-        url = url.replace("?", "");
+        url = url.replaceAll("[?]+$", "");      //去掉url末尾的问号
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        Set<Map.Entry<String, List<Object>>> entrySet = request.getFields().entrySet();
-
-        for (Map.Entry<String, List<Object>> entry : entrySet)
+        if (request.getFields() != null && !request.getFields().isEmpty())
         {
-            List<Object> values = entry.getValue();
+            Set<Map.Entry<String, List<Object>>> fieldsEntrySet = request.getFields().entrySet();
 
-            if (stringBuilder.length() > 0)
-                stringBuilder.append("&");
-            else
-                stringBuilder.append("?");
+            for (Map.Entry<String, List<Object>> fieldEntry : fieldsEntrySet)
+            {
+                List<Object> values = fieldEntry.getValue();
 
-            stringBuilder.append(entry.getKey());
-            stringBuilder.append("=");
+                if (stringBuilder.length() > 0)
+                    stringBuilder.append("&");
+                else
+                    stringBuilder.append("?");
 
-            String value = values.get(0).toString();
+                stringBuilder.append(fieldEntry.getKey());
+                stringBuilder.append("=");
+
+                String value = values.get(0).toString();
 
 //            try
 //            {
@@ -147,24 +157,40 @@ public class OkhttpUtil implements IHttpCore
 //                e.printStackTrace();
 //            }
 
-            stringBuilder.append(value);
+                stringBuilder.append(value);
 
-            Log.i("HttpRequest", "field: " + entry.getKey() + "=" + values.get(0).toString());
+                LogMelo.i("field: " + fieldEntry.getKey() + "=" + values.get(0).toString());
+            }
+
+            String params = stringBuilder.toString();
+            url += params;
         }
-
-        String params = stringBuilder.toString();
-        url += params;
 
 
         okhttp3.Request.Builder reqBuilder = new okhttp3.Request.Builder().url(url);
 
+        if (request.getHeaders() != null && !request.getHeaders().isEmpty())
+        {
+            Set<Map.Entry<String, String>> headersEntrySet = request.getHeaders().entrySet();
+
+            for (Map.Entry<String, String> headerEntry : headersEntrySet)
+            {
+                String key = headerEntry.getKey();
+                String value = headerEntry.getValue();
+
+                reqBuilder.header(key, value);
+
+                LogMelo.i("Header: " + key + "=" + value);
+            }
+        }
+
         okhttp3.Request req = reqBuilder.get().build();
 
-        call(getClient(request), req, coreCallback);
+        call(getClient(request), req, getCoreHttpCallback(request.getUrl().toString()));
     }
 
 
-    public void post(Request request, HttpCoreCallback coreCallback)
+    private void post(Request request)
     {
         RequestBody body;
 
@@ -184,10 +210,52 @@ public class OkhttpUtil implements IHttpCore
         String url = request.getUrl().toString();
 
         okhttp3.Request.Builder reqBuilder = new okhttp3.Request.Builder();
+
+        if (request.getHeaders() != null && !request.getHeaders().isEmpty())
+        {
+            Set<Map.Entry<String, String>> headersEntrySet = request.getHeaders().entrySet();
+
+            for (Map.Entry<String, String> headerEntry : headersEntrySet)
+            {
+                String key = headerEntry.getKey();
+                String value = headerEntry.getValue();
+
+                reqBuilder.header(key, value);
+
+                LogMelo.i("Header: " + key + "=" + value);
+            }
+        }
+
         okhttp3.Request req = reqBuilder.url(url).post(body).build();
 
-        call(getClient(request), req, coreCallback);
+        call(getClient(request), req, getCoreHttpCallback(request.getUrl().toString()));
     }
+
+
+    private CoreHttpCallback getCoreHttpCallback(String url)
+    {
+        CoreCallbakcs coreCallbakcs = mCallbackStore.getCallbacks(url);
+
+        if (coreCallbakcs != null)
+        {
+            return coreCallbakcs.getCoreHttpCallback();
+        }
+
+        return null;
+    }
+
+    private CoreCookieCallback getCoreCookieCallback(String url)
+    {
+        CoreCallbakcs coreCallbakcs = mCallbackStore.getCallbacks(url);
+
+        if (coreCallbakcs != null)
+        {
+            return coreCallbakcs.getCoreCookieCallback();
+        }
+
+        return null;
+    }
+
 
     private OkHttpClient getClient(Request request)
     {
@@ -218,6 +286,9 @@ public class OkhttpUtil implements IHttpCore
     {
         MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
 
+        if (request.getFields() != null && !request.getFields().isEmpty())
+            return builder.build();
+
         Set<Map.Entry<String, List<Object>>> entrySet = request.getFields().entrySet();
 
         for (Map.Entry<String, List<Object>> entry : entrySet)
@@ -244,14 +315,14 @@ public class OkhttpUtil implements IHttpCore
                 {
                     RequestBody fileBody = RequestBody.create(okhttp3.MediaType.parse(mediaType.toString()), file);
                     builder.addFormDataPart(entry.getKey(), file.getName(), fileBody);
-                    Log.i("HttpRequest", "field: " + entry.getKey() + "=[ " + "File: " + file.toString() + " | MediaType: " + mediaType + " ]");
+                    LogMelo.i("field: " + entry.getKey() + "=[ " + "File: " + file.toString() + " | MediaType: " + mediaType + " ]");
                 }
 
             } else
             {
                 builder.addFormDataPart(entry.getKey(), values.get(0).toString());
 
-                Log.i("HttpRequest", "field: " + entry.getKey() + "=" + values.get(0).toString());
+                LogMelo.i("field: " + entry.getKey() + "=" + values.get(0).toString());
             }
         }
 
@@ -263,6 +334,9 @@ public class OkhttpUtil implements IHttpCore
     {
         FormBody.Builder builder = new FormBody.Builder();
 
+        if (request.getFields() != null && !request.getFields().isEmpty())
+            return builder.build();
+
         Set<Map.Entry<String, List<Object>>> entrySet = request.getFields().entrySet();
 
         for (Map.Entry<String, List<Object>> entry : entrySet)
@@ -270,32 +344,43 @@ public class OkhttpUtil implements IHttpCore
             List<Object> values = entry.getValue();
             builder.add(entry.getKey(), values.get(0).toString());
 
-            Log.i("HttpRequest", "field: " + entry.getKey() + "=" + values.get(0).toString());
+            LogMelo.i("field: " + entry.getKey() + "=" + values.get(0).toString());
         }
 
         return builder.build();
     }
 
 
-    private void call(OkHttpClient client, okhttp3.Request request, final HttpCoreCallback coreCallback)
+    private void call(OkHttpClient client, okhttp3.Request request, final CoreHttpCallback coreCallback)
     {
-        Log.i("HttpRequest", request.toString());
+        LogMelo.i(request.toString());
 
         client.newCall(request).enqueue(new Callback()
         {
             @Override
-            public void onResponse(Call call, final okhttp3.Response response) throws IOException
+            public void onResponse(Call call, okhttp3.Response response)
             {
-                if (response.isSuccessful())
-                    coreCallback.onSuccess(response.body().string());
-                else
-                    coreCallback.onFailure();
+                if (coreCallback != null)
+                {
+                    try
+                    {
+                        if (response.isSuccessful())
+                            coreCallback.onSuccess(response.body().string());
+                        else
+                            coreCallback.onFailure(null);
+
+                    } catch (Throwable e)
+                    {
+                        coreCallback.onFailure(e);
+                    }
+                }
+
             }
 
             @Override
-            public void onFailure(Call call, final IOException e)
+            public void onFailure(Call call, IOException e)
             {
-                coreCallback.onFailure();
+                if (coreCallback != null) coreCallback.onFailure(e);
             }
         });
     }

@@ -9,13 +9,13 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 
 /**
- * 请求服务器地址(域名或IP)
- * Created by Jankey on 2017/7/4.
+ * 请求头
+ * Created by Jankey on 2017/9/20.
  */
 
-@Target({METHOD, TYPE, PARAMETER})
+@Target({TYPE, METHOD, PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Host
+public @interface Headers
 {
-    String value() default "";
+    String[] value() default {};
 }

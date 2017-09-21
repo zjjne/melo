@@ -6,6 +6,7 @@ import com.goteny.melo.http.enums.RequestTypes;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Jankey on 2017/6/26.
@@ -15,9 +16,9 @@ public class Request
 {
     private HttpUrl mUrl;
     private RequestTypes mRequestType;
-    private HashMap<String, String> mHeaders;
+    private Map<String, String> mHeaders;
     private ContentTypes mBodyContentType;
-    private HashMap<String, List<Object>> mFields;
+    private Map<String, List<Object>> mFields;
     private boolean mEnableCookies;
     private Timeout mTimeout;
 
@@ -41,12 +42,12 @@ public class Request
         this.mRequestType = mRequestType;
     }
 
-    public HashMap<String, String> getHeaders()
+    public Map<String, String> getHeaders()
     {
         return mHeaders;
     }
 
-    public void setHeaders(HashMap<String, String> mHeaders)
+    public void setHeaders(Map<String, String> mHeaders)
     {
         this.mHeaders = mHeaders;
     }
@@ -61,12 +62,12 @@ public class Request
         this.mBodyContentType = mBodyContentType;
     }
 
-    public HashMap<String, List<Object>> getFields()
+    public Map<String, List<Object>> getFields()
     {
         return mFields;
     }
 
-    public void setFields(HashMap<String, List<Object>> mFields)
+    public void setFields(Map<String, List<Object>> mFields)
     {
         this.mFields = mFields;
     }

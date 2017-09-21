@@ -2,20 +2,45 @@ package com.goteny.melo.http;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.google.gson.Gson;
+import com.goteny.melo.http.interfaces.CookieCallback;
+import com.goteny.melo.http.interfaces.CoreCookieCallback;
+import com.goteny.melo.http.interfaces.HttpCallback;
+import com.goteny.melo.http.interfaces.CoreHttpCallback;
+import com.goteny.melo.http.interfaces.IHttpWithCookie;
+import com.goteny.melo.utils.log.LogMelo;
+
+import java.lang.reflect.Type;
+import java.util.List;
+
+import okhttp3.Cookie;
 
 /**
  * Created by Jankey on 2017/6/21.
  */
 
 @SuppressWarnings("unchecked")
-public class BaseHttp<T> implements IHttp<T>, HttpCoreCallback
+public class BaseHttp<T> implements IHttpWithCookie<T>, CoreHttpCallback, CoreCookieCallback
 {
     protected Request request;
-    protected HttpCallback<T> callback;
-    private Class<T> clss;
+    protected CookieCallback cookieCallback;
+    protected HttpCallback<T> httpCallback;
+    protected Type type;
+
+    @Override
+    public IHttpWithCookie callback(HttpCallback<T> callback)
+    {
+        this.httpCallback = callback;
+        return this;
+    }
+
+    @Override
+    public IHttpWithCookie callback(CookieCallback callback)
+    {
+        this.cookieCallback = callback;
+        return this;
+    }
 
     @Override
     public void execute()
@@ -23,74 +48,96 @@ public class BaseHttp<T> implements IHttp<T>, HttpCoreCallback
         callCore();
     }
 
-    @Override
-    public void execute(HttpCallback<T> callback)
-    {
-        this.callback = callback;
-        execute();
-    }
-
     private void callCore()
     {
-        Log.i("HttpRequest", "url:" + request.getUrl());
-        Log.i("HttpRequest", "requestType:" + request.getRequestType());
-        Log.i("HttpRequest", "bodyContentType:" + request.getBodyContentType());
+        LogMelo.i("url:" + request.getUrl());
+        LogMelo.i("requestType:" + request.getRequestType());
+        LogMelo.i("bodyContentType:" + request.getBodyContentType());
 
-        Log.i("Http", "XsHttpUtil.getInstance(context).fetchIndex(modelNew) before okhttp");
+        CoreCallbakcs coreCallbakcs = new CoreCallbakcs(this, this);
 
-        OkhttpUtil.getInstance().send(request, this);
+        OkhttpUtil.getInstance().send(request, coreCallbakcs);
     }
 
     @Override
     public void onSuccess(String body)
     {
-        Log.v("LOG_HTTP_RESPONSE11111", "返回结果:\n" + body);
+        LogMelo.v("返回结果:\n" + body);
 
         try
         {
-            Gson gson = new Gson();
-            T t = gson.fromJson(body, clss);
+            if (httpCallback != null)
+            {
+                Gson gson = new Gson();
+                T t = gson.fromJson(body, type);
 
-            if (callback != null) callbackSuccess(t);
+                callbackSuccess(t);
+            }
 
         }catch (Throwable e)
         {
-            Log.v("LOG_HTTP_RESPONSE1111", e.toString());
+            LogMelo.i(e.toString());
+
+            if (httpCallback != null) callbackFailure(e);
         }
     }
 
 
 
     @Override
-    public void onFailure()
+    public void onFailure(Throwable throwable)
     {
-        if (callback != null) callbackFailure();
+        if (httpCallback != null) callbackFailure(throwable);
+    }
+
+
+
+    @Override
+    public void cookies(List<Cookie> cookies)
+    {
+        if (cookieCallback != null) cookieCallback(cookies);
     }
 
 
 
 
-    private void callbackSuccess(final T t)
+    protected void cookieCallback(final List<Cookie> cookies)
     {
+        if (cookieCallback == null) return;
+
         postRunable(new Runnable()
         {
             @Override
             public void run()
             {
-                callback.onSuccess(t);
+                cookieCallback.cookies(cookies);
+            }
+        });
+    }
+
+    protected void callbackSuccess(final T t)
+    {
+        if (httpCallback == null) return;
+
+        postRunable(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                httpCallback.onSuccess(t);
             }
         });
     }
 
 
-    private void callbackFailure()
+    protected void callbackFailure(final Throwable throwable)
     {
         postRunable(new Runnable()
         {
             @Override
             public void run()
             {
-                callback.onFailure(null);
+                httpCallback.onFailure(throwable);
             }
         });
     }
@@ -113,8 +160,9 @@ public class BaseHttp<T> implements IHttp<T>, HttpCoreCallback
         this.request = request;
     }
 
-    public void setClss(Class<T> clss)
+    public void setType(Type type)
     {
-        this.clss = clss;
+        this.type = type;
     }
+
 }

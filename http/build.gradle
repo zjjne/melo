@@ -4,12 +4,13 @@ apply plugin: 'com.novoda.bintray-release'
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
+    publishNonDefault true      //发布多种aar，包括debug和release等
 
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 17090719
-        versionName "0.1.4"
+        versionCode 17092018
+        versionName "0.2.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -23,14 +24,16 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    releaseCompile project(path: ':utils', configuration: 'release')
+    debugCompile project(path: ':utils', configuration: 'debug')
     compile 'com.android.support:support-v4:25.3.1'
-    compile 'com.google.code.gson:gson:2.6.2'
-    compile 'com.squareup.okhttp3:okhttp:3.4.2'
-    compile 'com.squareup.okio:okio:1.11.0'
+    compile 'com.google.code.gson:gson:2.7'
+    compile 'com.squareup.okhttp3:okhttp:3.9.0'
+    compile 'com.squareup.okio:okio:1.13.0'
     testCompile 'junit:junit:4.12'
 }
 
@@ -44,16 +47,16 @@ def bintrayKeyVal = properties.getProperty('bintrayKey')
 
 
 publish {
-    userOrg = 'zjjne'                           //jcenter的用户名
-    groupId = 'com.goteny.melo'                 //组织id
-    artifactId = 'http'                         //package包(库)的id(标识)
-    repoName = 'melo'                           //已经在jcenter中创建的仓库名，如果不设置，默认为'maven'
-    uploadName = 'com.goteny.melo:http'         //展示在jcenter中的package包(库)名字，如果不设置，默认为artifactId的值
-    publishVersion = '0.1.4'                    //package包(库)的版本
-    desc = 'android http util'                  //库的描述
-    website = 'https://github.com/zjjne/melo'   //库的相关网址
-    bintrayUser = bintrayUserVal                //上面task中读取到的jcenterName
-    bintrayKey = bintrayKeyVal                  //上面task中读取到的apiKey
+    userOrg = 'zjjne'                                       //jcenter的用户名
+    groupId = 'com.goteny.melo'                             //组织id
+    artifactId = 'http'                                     //package包(库)的id(标识)
+    repoName = 'melo'                                       //已经在jcenter中创建的仓库名，如果不设置，默认为'maven'
+    uploadName = 'com.goteny.melo:http'                     //展示在jcenter中的package包(库)名字，如果不设置，默认为artifactId的值
+    publishVersion = android.defaultConfig.versionName      //package包(库)的版本，直接用defaultConfig的versionName
+    desc = 'android http util'                              //库的描述
+    website = 'https://github.com/zjjne/melo'               //库的相关网址
+    bintrayUser = bintrayUserVal                            //上面task中读取到的jcenterName
+    bintrayKey = bintrayKeyVal                              //上面task中读取到的apiKey
     dryRun = false
 }
 
@@ -73,8 +76,12 @@ tasks.withType(Javadoc) {
 
 
 // 打包上传到jcenter的方法:
+// 0.【重点先配置这个，不然后面执行bintrayUpload会上传不成功但又没有任何错误提示】
+//      在local.properties配置bintrayUser和bintrayKey的值，bintrayUser为jcenter用户名，bintrayKey为jcenter网站个人中心里的API Key
 // 1.clean整个工程
 // 2.编译http模块生成完整的.aar文件(也可选择编译apk，这样也可以生成完整的.aar)，否则.aar包里面可能会没.jar包等(不完整)
+//      由于dependencies节点配置区分了releaseCompile和debugCompile，所以默认不会同时生成release和debug aar包
+//      而此处需要的是两个aar包，因此需要运行 J.Melo -> :http -> Tasks -> build -> assemble 来生成两个aar包
 // 3.运行Gradle Task生成javadoc、pom等，Task如下:
 //      J.Melo -> :http -> Tasks -> publishing -> publishToMavenLocal
 // 4.此时http model的build文件夹下会生成docs、publications、tmp三个目录

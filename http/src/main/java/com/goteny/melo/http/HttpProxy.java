@@ -1,7 +1,7 @@
 package com.goteny.melo.http;
 
 
-import android.util.Log;
+import com.goteny.melo.utils.log.LogMelo;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -26,8 +26,8 @@ public class HttpProxy implements InvocationHandler
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
     {
-        Log.i("HttpProxy", "method toGenericString:" + method.toGenericString());
-        Log.i("HttpProxy", "method name:" + method.getName());
+//        LogMelo.i("method toGenericString:" + method.toGenericString());
+//        LogMelo.i("method name:" + method.getName());
 
         return RequestHandler.createRequest(method, args);
     }
@@ -48,9 +48,9 @@ public class HttpProxy implements InvocationHandler
     /**
      * 创建API接口代理对象
      *
-     * @param api
-     * @param <T>
-     * @return
+     * @param api api接口
+     * @param <T> Class的泛型
+     * @return 返回的API接口的实现类对象
      */
     public <T> T create(Class<T> api)
     {

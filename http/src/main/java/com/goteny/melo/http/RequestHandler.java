@@ -1,19 +1,18 @@
 package com.goteny.melo.http;
 
 
-import android.text.TextUtils;
-import android.util.Log;
-
 import com.goteny.melo.http.annotations.Api;
 import com.goteny.melo.http.annotations.BodyContentType;
 import com.goteny.melo.http.annotations.Cookie;
 import com.goteny.melo.http.annotations.Field;
+import com.goteny.melo.http.annotations.Headers;
 import com.goteny.melo.http.annotations.Host;
 import com.goteny.melo.http.annotations.MediaType;
 import com.goteny.melo.http.annotations.RequestType;
 import com.goteny.melo.http.annotations.Timeout;
 import com.goteny.melo.http.enums.ContentTypes;
 import com.goteny.melo.http.enums.MediaTypes;
+import com.goteny.melo.utils.log.LogMelo;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -22,6 +21,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+//import com.google.gson.reflect.TypeToken;
 
 /**
  * 请求BaseRequest对象创建助手类
@@ -35,14 +37,23 @@ public class RequestHandler
 
     /**
      * 创建HttpRequest请求对象
-     * @param method
-     * @param args
-     * @return
+     * @param method 方法
+     * @param args 参数
+     * @return BaseHttp对象
      */
     public static BaseHttp createRequest(Method method, Object[] args)
     {
-        Host globalHost = method.getDeclaringClass().getAnnotation(Host.class);
-        Host host = method.getAnnotation(Host.class);
+        String hostStr = "";
+        String apiStr = "";
+        ContentTypes contentType;
+        com.goteny.melo.http.Timeout to = null;
+        boolean enableCookies = false;
+        Map<String, String> headers = null;
+
+
+        Host globalHost = method.getDeclaringClass().getAnnotation(Host.class);     //全局host
+        Host staticLocalHost = method.getAnnotation(Host.class);                    //静态局部host
+        Host dynamicLocalHost = null;                                               //动态局部host
         Api api = method.getAnnotation(Api.class);
         RequestType requestType = method.getAnnotation(RequestType.class);
         BodyContentType bodyContentType = method.getAnnotation(BodyContentType.class);
@@ -50,6 +61,9 @@ public class RequestHandler
         Timeout timeout = method.getAnnotation(Timeout.class);
         Cookie globalCookie = method.getDeclaringClass().getAnnotation(Cookie.class);
         Cookie cookie = method.getAnnotation(Cookie.class);
+        Headers globalHeaders = method.getDeclaringClass().getAnnotation(Headers.class);     //全局headers
+        Headers staticLocalHeaders = method.getAnnotation(Headers.class);                    //静态局部headers
+        Headers dynamicLocalHeaders = null;                                                 //动态局部headers
 
         Annotation[][] parameters = method.getParameterAnnotations();
 
@@ -62,80 +76,45 @@ public class RequestHandler
 
             for (Annotation annotation : parameters[i])
             {
-                if (annotation.annotationType().equals(Field.class))
+                if (annotation.annotationType().equals(Field.class))                //取得参数field的key value
                 {
                     key = ((Field) annotation).value();     //取得注解值key
                     values.add(args[i]);                    //取得被注解的参数对象，放入List
-                }else if (annotation.annotationType().equals(MediaType.class))
+                }else if (annotation.annotationType().equals(MediaType.class))      //取得媒体格式类型
                 {
-                    MediaTypes contentType = ((MediaType) annotation).value();
-                    values.add(contentType);                //取得文件类型描述，放入List
+                    MediaTypes mediaType = ((MediaType) annotation).value();
+                    values.add(mediaType);                //取得文件类型描述，放入List
+                }else if (annotation.annotationType().equals(Host.class))           //取得局部动态host值
+                {
+                    dynamicLocalHost = (Host) annotation;
+                    hostStr = (String) args[i];
+                }else if (annotation.annotationType().equals(Headers.class))         //取得局部动态headers
+                {
+                    dynamicLocalHeaders = (Headers) annotation;
+                    headers = (Map<String, String>) args[i];
                 }
             }
 
             if (key != null) map.put(key, values);
         }
 
-//        HashMap<String, Object> map = new HashMap<>();
-//
-//        for (int i = 0; i < parameters.length; i++)
-//        {
-//            for (Annotation annotation : parameters[i])
-//            {
-//                if (annotation.annotationType().equals(Field.class))
-//                {
-//                    String key = ((Field) annotation).value();
-//                    map.put(key, args[i]);
-//                }
-//            }
-//        }
 
-//        Annotation[][] pa = method.getParameterAnnotations();
-//
-//        //pa.length为方法的参数个数
-//        Log.i("HttpProxy", "pa.length:" + pa.length);
-//
-//        for (Annotation[] aa: pa)
-//        {
-//            //aa.length为此参数的注解个数
-//            Log.i("HttpProxy", "aa.length:" + aa.length);
-//            for (Annotation a: aa)
-//            {
-//                Log.i("HttpProxy", "ParameterAnnotation:" + a);
-//            }
-//        }
-
-
-        Log.i("HttpProxy", "globalHost:" + globalHost);
-
-        String hostStr = (globalHost == null || globalHost.value() == null)? "" : globalHost.value();
-
-        Log.i("HttpProxy", "globalHost.value: " + hostStr);
-
-        hostStr = (host == null || host.value() == null)? hostStr : host.value();
-
-        Log.i("HttpProxy", "host: " + host);
-        Log.i("HttpProxy", "hostStr: " + hostStr);
-
-        String apiStr = (api == null || api.value() == null)? "" : api.value();
-
-        if (!TextUtils.isEmpty(apiStr))
+        //主机名host
+        if (dynamicLocalHost == null || dynamicLocalHost.value() == null)
         {
-            hostStr = (hostStr.trim().equals(""))? "" : (hostStr + "/");
+            hostStr = (globalHost == null || globalHost.value() == null)? hostStr : globalHost.value();
 
-            //正则表达式，替换字符串末尾的所有"/"符号为单个"/"   如"////"会替换为"/"
-            hostStr = (!hostStr.trim().equals(""))? hostStr.replaceAll("/+$", "/") : "";
+            hostStr = (staticLocalHost == null || staticLocalHost.value() == null)? hostStr : staticLocalHost.value();
         }
 
-        //正则表达式，判断字符串开头是否含有"http://" "https://" "HTTP://" "HTTPS://"，不含则添加"http://"到字符串前面
-        hostStr = (!hostStr.trim().equals("") && !hostStr.matches("^(?:http|https|HTTP|HTTPS)://\\S+$"))? ("http://" + hostStr) : "";
+        //api路径path
+        apiStr = (api == null || api.value() == null)? apiStr : api.value();
 
-        String url = hostStr + apiStr;
+        //媒体类型
+        contentType = (bodyContentType == null)? null : bodyContentType.value();
 
-        ContentTypes contentType = (bodyContentType == null)? null : bodyContentType.value();
 
-        com.goteny.melo.http.Timeout to = null;
-
+        //超时时间
         if (timeout != null)
         {
             to = new com.goteny.melo.http.Timeout(timeout.timeout(), timeout.timeUnit());
@@ -145,8 +124,7 @@ public class RequestHandler
         }
 
 
-        boolean enableCookies = false;
-
+        //是否启用cookie
         if (cookie != null)
         {
             enableCookies = true;
@@ -154,9 +132,34 @@ public class RequestHandler
             if (globalCookie != null) enableCookies = true;
         }
 
+
+        //请求头headers
+        if (dynamicLocalHeaders == null || dynamicLocalHeaders.value() == null || dynamicLocalHeaders.value().length <= 0)
+        {
+            String[] hds = null;
+            hds = (globalHeaders == null || globalHeaders.value() == null || globalHeaders.value().length <= 0)? hds : globalHeaders.value();
+            hds = (staticLocalHeaders == null || staticLocalHeaders.value() == null || staticLocalHeaders.value().length <= 0)? hds : staticLocalHeaders.value();
+
+            if (hds != null && hds.length > 0)
+            {
+                headers = new HashMap<>();
+
+                for (String str: hds)
+                {
+                    String[] keyValue = str.split("[:]", 2);     //拆分header的key和vaule
+                    headers.put(keyValue[0].trim(), keyValue[1].trim());
+                }
+            }
+        }
+
+        HttpUrl httpUrl = new HttpUrl();
+        httpUrl.setHost(hostStr);
+        httpUrl.setPath(apiStr);
+
         Request request = new Request();
-        request.setUrl(new HttpUrl(url));
+        request.setUrl(httpUrl);
         request.setFields(map);
+        request.setHeaders(headers);
         request.setRequestType(requestType.value());
         request.setBodyContentType(contentType);
         request.setTimeout(to);
@@ -165,7 +168,7 @@ public class RequestHandler
         Type returnType = method.getGenericReturnType();    //获取函数返回值类型type
 
         Class cls = getRawClass(returnType);
-        Class clss = getGenricClass(returnType, 0);         //取返回值类里的泛型的class
+        Type type = getGenricType(returnType, 0);         //取返回值类里的泛型的type
 
         BaseHttp http;
 
@@ -174,15 +177,20 @@ public class RequestHandler
             http = (BaseHttp) cls.newInstance();
         } catch (Throwable e)
         {
-            e.printStackTrace();
+            LogMelo.i("BaseHttp convert failed " + e );
             http = new BaseHttp<>();
         }
 
-        http.setClss(clss);
+        http.setType(type);
         http.setRequest(request);
 
-        Log.i("HttpProxy", "Annotation api:" + api);
-        Log.i("HttpProxy", "Annotation api.value():" + apiStr);
+        LogMelo.i("globalHost: "        + globalHost);
+        LogMelo.i("staticLocalHost: "   + staticLocalHost);
+        LogMelo.i("dynamicLocalHost: "  + dynamicLocalHost);
+        LogMelo.i("hostStr: "           + hostStr);
+        LogMelo.i("apiStr: "            + apiStr);
+        LogMelo.i("enableCookies: "     + enableCookies);
+        LogMelo.i("contentType: "       + contentType);
 
         return http;
     }
@@ -196,36 +204,57 @@ public class RequestHandler
     private static Class getRawClass(Type type)
     {
         if (!(type instanceof ParameterizedType))
-            return Object.class;
+            return (Class) type;
 
         Type rawType = ((ParameterizedType) type).getRawType();
         if (rawType != null)
             return (Class) rawType;
 
-        return Object.class;
+        return (Class) type;
     }
 
 
+//    /**
+//     * 取type对象内第index个泛型的真实类的class对象(即类Abcde<T>的T类)
+//     * @param type type对象须实现了接口ParameterizedType才能正确返回真实类的class对象(即type为Abcde<T>类)
+//     * @param index
+//     * @return
+//     */
+//    private static Class getGenricClass(Type type, int index)
+//    {
+//        if (!(type instanceof ParameterizedType))
+//            return Object.class;
+//
+//        //getActualTypeArguments为取ParameterizedType实现类里的args数组，此数组为type对象所携带的所有泛型的真实类数组
+//        Type[] params = ((ParameterizedType) type).getActualTypeArguments();
+//
+//        if (index >= params.length || index < 0)
+//            return Object.class;
+//
+//        if ( !(params[index] instanceof Class))
+//            return Object.class;
+//
+//        return (Class) params[index];
+//    }
+
+
     /**
-     * 取type对象内第index个泛型的真实类的class对象(即类Abcde<T>的T类)
-     * @param type type对象须实现了接口ParameterizedType才能正确返回真实类的class对象(即type为Abcde<T>类)
+     * 取type对象内第index个泛型的真实类的Type对象(即类Abcde<T>的T类)
+     * @param type type对象须实现了接口ParameterizedType才能正确返回真实类的type对象(即type为Abcde<T>类)
      * @param index
      * @return
      */
-    private static Class getGenricClass(Type type, int index)
+    private static Type getGenricType(Type type, int index)
     {
         if (!(type instanceof ParameterizedType))
-            return Object.class;
+            return type;
 
         //getActualTypeArguments为取ParameterizedType实现类里的args数组，此数组为type对象所携带的所有泛型的真实类数组
         Type[] params = ((ParameterizedType) type).getActualTypeArguments();
 
         if (index >= params.length || index < 0)
-            return Object.class;
+            return type;
 
-        if (!(params[index] instanceof Class))
-            return Object.class;
-
-        return (Class) params[index];
+        return params[index];
     }
 }
