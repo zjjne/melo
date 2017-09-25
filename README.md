@@ -1,5 +1,10 @@
 # melo
-android code utils
+Is an android code util
 
 # use
-	compile 'com.goteny.melo:http:0.1.4'
+
+###### http moudle
+	compile 'com.goteny.melo:http:0.2.1'
+	
+###### utils moudle
+    compile 'com.goteny.melo:utils:0.0.1'

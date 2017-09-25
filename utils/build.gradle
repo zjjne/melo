@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+//apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 25
@@ -25,3 +26,41 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
+
+
+
+
+//Properties properties = new Properties()
+//properties.load(project.rootProject.file('local.properties').newDataInputStream())
+//def bintrayUserVal = properties.getProperty('bintrayUser')
+//def bintrayKeyVal = properties.getProperty('bintrayKey')
+//
+//
+//
+//publish {
+//    userOrg = 'zjjne'                                       //jcenter的用户名
+//    groupId = 'com.goteny.melo'                             //组织id
+//    artifactId = 'utils'                                    //package包(库)的id(标识)
+//    repoName = 'melo'                                       //已经在jcenter中创建的仓库名，如果不设置，默认为'maven'
+//    uploadName = 'com.goteny.melo:utils'                    //展示在jcenter中的package包(库)名字，如果不设置，默认为artifactId的值
+//    publishVersion = android.defaultConfig.versionName      //package包(库)的版本，直接用defaultConfig的versionName
+//    desc = 'android utils'                                  //库的描述
+//    website = 'https://github.com/zjjne/melo'               //库的相关网址
+//    bintrayUser = bintrayUserVal                            //上面task中读取到的jcenterName
+//    bintrayKey = bintrayKeyVal                              //上面task中读取到的apiKey
+//    dryRun = false
+//}
+
+
+
+// 若需要javadoc.需要设置一下编码和过滤一下错误.
+// 否则如果注释带中文等，会导致无法正常生成Javadoc
+//allprojects {
+tasks.withType(Javadoc) {
+    options{
+        encoding "UTF-8"
+        charSet 'UTF-8'
+        links "http://docs.oracle.com/javase/8/docs/api"
+    }
+}
+//}

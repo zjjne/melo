@@ -286,7 +286,7 @@ public class OkhttpUtil implements IHttpCore
     {
         MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
 
-        if (request.getFields() != null && !request.getFields().isEmpty())
+        if (request.getFields() == null || request.getFields().isEmpty())
             return builder.build();
 
         Set<Map.Entry<String, List<Object>>> entrySet = request.getFields().entrySet();
@@ -334,7 +334,7 @@ public class OkhttpUtil implements IHttpCore
     {
         FormBody.Builder builder = new FormBody.Builder();
 
-        if (request.getFields() != null && !request.getFields().isEmpty())
+        if (request.getFields() == null || request.getFields().isEmpty())
             return builder.build();
 
         Set<Map.Entry<String, List<Object>>> entrySet = request.getFields().entrySet();

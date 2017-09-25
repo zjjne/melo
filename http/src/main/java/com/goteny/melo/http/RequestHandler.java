@@ -49,6 +49,7 @@ public class RequestHandler
         com.goteny.melo.http.Timeout to = null;
         boolean enableCookies = false;
         Map<String, String> headers = null;
+        String[] headerStrings = null;
 
 
         Host globalHost = method.getDeclaringClass().getAnnotation(Host.class);     //全局host
@@ -91,7 +92,7 @@ public class RequestHandler
                 }else if (annotation.annotationType().equals(Headers.class))         //取得局部动态headers
                 {
                     dynamicLocalHeaders = (Headers) annotation;
-                    headers = (Map<String, String>) args[i];
+                    headerStrings = (String[]) args[i];
                 }
             }
 
@@ -103,7 +104,6 @@ public class RequestHandler
         if (dynamicLocalHost == null || dynamicLocalHost.value() == null)
         {
             hostStr = (globalHost == null || globalHost.value() == null)? hostStr : globalHost.value();
-
             hostStr = (staticLocalHost == null || staticLocalHost.value() == null)? hostStr : staticLocalHost.value();
         }
 
@@ -136,19 +136,18 @@ public class RequestHandler
         //请求头headers
         if (dynamicLocalHeaders == null || dynamicLocalHeaders.value() == null || dynamicLocalHeaders.value().length <= 0)
         {
-            String[] hds = null;
-            hds = (globalHeaders == null || globalHeaders.value() == null || globalHeaders.value().length <= 0)? hds : globalHeaders.value();
-            hds = (staticLocalHeaders == null || staticLocalHeaders.value() == null || staticLocalHeaders.value().length <= 0)? hds : staticLocalHeaders.value();
+            headerStrings = (globalHeaders == null || globalHeaders.value() == null || globalHeaders.value().length <= 0)? headerStrings : globalHeaders.value();
+            headerStrings = (staticLocalHeaders == null || staticLocalHeaders.value() == null || staticLocalHeaders.value().length <= 0)? headerStrings : staticLocalHeaders.value();
+        }
 
-            if (hds != null && hds.length > 0)
+        if (headerStrings != null && headerStrings.length > 0)
+        {
+            headers = new HashMap<>();
+
+            for (String str: headerStrings)
             {
-                headers = new HashMap<>();
-
-                for (String str: hds)
-                {
-                    String[] keyValue = str.split("[:]", 2);     //拆分header的key和vaule
-                    headers.put(keyValue[0].trim(), keyValue[1].trim());
-                }
+                String[] keyValue = str.split("[:]", 2);     //拆分header的key和vaule
+                headers.put(keyValue[0].trim(), keyValue[1].trim());
             }
         }
 
