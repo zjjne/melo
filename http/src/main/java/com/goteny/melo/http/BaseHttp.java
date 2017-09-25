@@ -29,14 +29,14 @@ public class BaseHttp<T> implements IHttpWithCookie<T>, CoreHttpCallback, CoreCo
     protected Type type;
 
     @Override
-    public IHttpWithCookie callback(HttpCallback<T> callback)
+    public IHttpWithCookie<T> callback(HttpCallback<T> callback)
     {
         this.httpCallback = callback;
         return this;
     }
 
     @Override
-    public IHttpWithCookie callback(CookieCallback callback)
+    public IHttpWithCookie<T> callback(CookieCallback callback)
     {
         this.cookieCallback = callback;
         return this;
