@@ -132,6 +132,8 @@ public class BaseHttp<T> implements IHttpWithCookie<T>, CoreHttpCallback, CoreCo
 
     protected void callbackFailure(final Throwable throwable)
     {
+        if (httpCallback == null) return;
+
         postRunable(new Runnable()
         {
             @Override

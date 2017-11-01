@@ -10,7 +10,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 25
         versionCode 17092515
-        versionName "0.2.2"
+        versionName "0.2.3"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -58,6 +58,8 @@ publish {
     bintrayUser = bintrayUserVal                            //上面task中读取到的jcenterName
     bintrayKey = bintrayKeyVal                              //上面task中读取到的apiKey
     dryRun = false
+    autoPublish = true                                      //此值为是否自动发布包(即是否上传aar等文件), 默认为true
+                                                            //false为手动发布(此时只会在在jcenter创建版本文件夹，而不会上传jar aar等所有文件)。
 }
 
 

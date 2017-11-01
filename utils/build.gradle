@@ -10,7 +10,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 25
         versionCode 17090818
-        versionName "0.0.1"
+        versionName "0.0.2"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -30,13 +30,13 @@ dependencies {
 
 
 
-//Properties properties = new Properties()
-//properties.load(project.rootProject.file('local.properties').newDataInputStream())
-//def bintrayUserVal = properties.getProperty('bintrayUser')
-//def bintrayKeyVal = properties.getProperty('bintrayKey')
-//
-//
-//
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def bintrayUserVal = properties.getProperty('bintrayUser')
+def bintrayKeyVal = properties.getProperty('bintrayKey')
+
+
+
 //publish {
 //    userOrg = 'zjjne'                                       //jcenter的用户名
 //    groupId = 'com.goteny.melo'                             //组织id
@@ -49,6 +49,8 @@ dependencies {
 //    bintrayUser = bintrayUserVal                            //上面task中读取到的jcenterName
 //    bintrayKey = bintrayKeyVal                              //上面task中读取到的apiKey
 //    dryRun = false
+//    autoPublish = true                                      //此值为是否自动发布包(即是否上传aar等文件), 默认为true
+//                                                            //false为手动发布(此时只会在在jcenter创建版本文件夹，而不会上传jar aar等所有文件)。
 //}
 
 

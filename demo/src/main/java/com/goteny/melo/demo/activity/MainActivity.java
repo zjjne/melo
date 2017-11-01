@@ -11,7 +11,7 @@ import com.goteny.melo.demo.bean.GitHubMain;
 import com.goteny.melo.demo.http.DemoHttpUtil;
 import com.goteny.melo.http.interfaces.HttpCallback;
 import com.goteny.melo.utils.log.LogMelo;
-import com.goteny.melon.demo.R;
+import com.goteny.melo.demo.R;
 
 import java.util.List;
 
