@@ -56,7 +56,7 @@ public interface DemoApi
 
     @RequestType(RequestTypes.GET)
     BaseHttp testHeader2(
-            @Headers Map<String, String> headers
+            @Headers String[] headers
     );
 
 }

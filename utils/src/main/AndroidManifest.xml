@@ -1,13 +1,5 @@
 <manifest
-    package="com.goteny.melo.utils"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    >
-
-    <application
-        android:allowBackup="true"
-        android:supportsRtl="true"
-        >
-
-    </application>
+    package="com.goteny.melo.utils" >
 
 </manifest>

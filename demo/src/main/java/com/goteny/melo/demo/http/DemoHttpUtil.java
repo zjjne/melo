@@ -74,9 +74,7 @@ public class DemoHttpUtil
     {
         LogMelo.i(getClass().getSimpleName(), "testHeader2");
 
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Accept", "application/text");
-        headers.put("User-Agent", System.getProperty("http.agent"));
+        String[] headers = new String[]{"Accept:application/text",  "User-Agent:" + System.getProperty("http.agent")};
 
         return mHttpApi.testHeader2(headers);
     }
