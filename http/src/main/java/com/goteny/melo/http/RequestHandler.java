@@ -12,6 +12,7 @@ import com.goteny.melo.http.annotations.RequestType;
 import com.goteny.melo.http.annotations.Timeout;
 import com.goteny.melo.http.enums.ContentTypes;
 import com.goteny.melo.http.enums.MediaTypes;
+import com.goteny.melo.http.enums.RequestTypes;
 import com.goteny.melo.utils.log.LogMelo;
 
 import java.lang.annotation.Annotation;
@@ -23,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//import com.google.gson.reflect.TypeToken;
 
 /**
  * 请求BaseRequest对象创建助手类
@@ -43,39 +43,40 @@ public class RequestHandler
      */
     public static BaseHttp createRequest(Method method, Object[] args)
     {
-        String hostStr = "";
-        String apiStr = "";
+        String host = "";
+        String api = "";
         ContentTypes contentType;
-        com.goteny.melo.http.Timeout to = null;
+        RequestTypes requestType;
+        com.goteny.melo.http.Timeout timeout = null;
         boolean enableCookies = false;
-        Map<String, String> headers = null;
-        String[] headerStrings = null;
+        Map<String, String> headersMap = null;
+        String[] headers = null;
 
 
-        Host globalHost = method.getDeclaringClass().getAnnotation(Host.class);     //全局host
-        Host staticLocalHost = method.getAnnotation(Host.class);                    //静态局部host
-        Host dynamicLocalHost = null;                                               //动态局部host
-        Api api = method.getAnnotation(Api.class);
-        RequestType requestType = method.getAnnotation(RequestType.class);
-        BodyContentType bodyContentType = method.getAnnotation(BodyContentType.class);
-        Timeout globalTimeout = method.getDeclaringClass().getAnnotation(Timeout.class);
-        Timeout timeout = method.getAnnotation(Timeout.class);
-        Cookie globalCookie = method.getDeclaringClass().getAnnotation(Cookie.class);
-        Cookie cookie = method.getAnnotation(Cookie.class);
-        Headers globalHeaders = method.getDeclaringClass().getAnnotation(Headers.class);     //全局headers
-        Headers staticLocalHeaders = method.getAnnotation(Headers.class);                    //静态局部headers
-        Headers dynamicLocalHeaders = null;                                                 //动态局部headers
+        Host globalHostAnno = method.getDeclaringClass().getAnnotation(Host.class);     //全局host
+        Host staticLocalHostAnno = method.getAnnotation(Host.class);                    //静态局部host
+        Host dynamicLocalHostAnno = null;                                               //动态局部host
+        Api apiAnno = method.getAnnotation(Api.class);
+        RequestType requestTypeAnno = method.getAnnotation(RequestType.class);
+        BodyContentType contentTypeAnno = method.getAnnotation(BodyContentType.class);
+        Timeout globalTimeoutAnno = method.getDeclaringClass().getAnnotation(Timeout.class);
+        Timeout timeoutAnno = method.getAnnotation(Timeout.class);
+        Cookie globalCookieAnno = method.getDeclaringClass().getAnnotation(Cookie.class);
+        Cookie cookieAnno = method.getAnnotation(Cookie.class);
+        Headers globalHeadersAnno = method.getDeclaringClass().getAnnotation(Headers.class);     //全局headers
+        Headers staticLocalHeadersAnno = method.getAnnotation(Headers.class);                    //静态局部headers
+        Headers dynamicLocalHeadersAnno = null;                                                 //动态局部headers
 
-        Annotation[][] parameters = method.getParameterAnnotations();
+        Annotation[][] parameterAnnos = method.getParameterAnnotations();
 
-        HashMap<String, List<Object>> map = new HashMap<>();
+        HashMap<String, List<Object>> fieldsMap = new HashMap<>();
 
-        for (int i = 0; i < parameters.length; i++)
+        for (int i = 0; i < parameterAnnos.length; i++)
         {
             List<Object> values = new ArrayList<>();
             String key = null;
 
-            for (Annotation annotation : parameters[i])
+            for (Annotation annotation : parameterAnnos[i])
             {
                 if (annotation.annotationType().equals(Field.class))                //取得参数field的key value
                 {
@@ -87,81 +88,89 @@ public class RequestHandler
                     values.add(mediaType);                //取得文件类型描述，放入List
                 }else if (annotation.annotationType().equals(Host.class))           //取得局部动态host值
                 {
-                    dynamicLocalHost = (Host) annotation;
-                    hostStr = (String) args[i];
+                    dynamicLocalHostAnno = (Host) annotation;
+                    host = (String) args[i];
                 }else if (annotation.annotationType().equals(Headers.class))         //取得局部动态headers
                 {
-                    dynamicLocalHeaders = (Headers) annotation;
-                    headerStrings = (String[]) args[i];
+                    dynamicLocalHeadersAnno = (Headers) annotation;
+                    headers = (String[]) args[i];
                 }
             }
 
-            if (key != null) map.put(key, values);
+            if (key != null) fieldsMap.put(key, values);
         }
 
 
         //主机名host
-        if (dynamicLocalHost == null || dynamicLocalHost.value() == null)
+        if (dynamicLocalHostAnno == null || dynamicLocalHostAnno.value() == null)
         {
-            hostStr = (globalHost == null || globalHost.value() == null)? hostStr : globalHost.value();
-            hostStr = (staticLocalHost == null || staticLocalHost.value() == null)? hostStr : staticLocalHost.value();
+            host = (globalHostAnno == null || globalHostAnno.value() == null)? host : globalHostAnno.value();
+            host = (staticLocalHostAnno == null || staticLocalHostAnno.value() == null)? host : staticLocalHostAnno.value();
         }
 
         //api路径path
-        apiStr = (api == null || api.value() == null)? apiStr : api.value();
+        api = (apiAnno == null || apiAnno.value() == null)? api : apiAnno.value();
+
+        //请求类型
+        requestType = (requestTypeAnno == null || requestTypeAnno.value() == null)?
+                RequestTypes.GET : requestTypeAnno.value();
 
         //媒体类型
-        contentType = (bodyContentType == null)? null : bodyContentType.value();
+        contentType = (contentTypeAnno == null || contentTypeAnno.value() == null)?
+                ContentTypes.APPLICATION_FORM_URLENCODED : contentTypeAnno.value();
 
 
         //超时时间
-        if (timeout != null)
+        if (timeoutAnno != null)
         {
-            to = new com.goteny.melo.http.Timeout(timeout.timeout(), timeout.timeUnit());
+            timeout = new com.goteny.melo.http.Timeout(timeoutAnno.timeout(), timeoutAnno.timeUnit());
         }else {
-            if (globalTimeout != null)
-                to = new com.goteny.melo.http.Timeout(globalTimeout.timeout(), globalTimeout.timeUnit());
+            if (globalTimeoutAnno != null)
+                timeout = new com.goteny.melo.http.Timeout(globalTimeoutAnno.timeout(), globalTimeoutAnno.timeUnit());
         }
 
 
         //是否启用cookie
-        if (cookie != null)
+        if (cookieAnno != null)
         {
             enableCookies = true;
         }else {
-            if (globalCookie != null) enableCookies = true;
+            if (globalCookieAnno != null) enableCookies = true;
         }
 
 
         //请求头headers
-        if (dynamicLocalHeaders == null || dynamicLocalHeaders.value() == null || dynamicLocalHeaders.value().length <= 0)
+        if (dynamicLocalHeadersAnno == null || dynamicLocalHeadersAnno.value() == null || dynamicLocalHeadersAnno.value().length <= 0)
         {
-            headerStrings = (globalHeaders == null || globalHeaders.value() == null || globalHeaders.value().length <= 0)? headerStrings : globalHeaders.value();
-            headerStrings = (staticLocalHeaders == null || staticLocalHeaders.value() == null || staticLocalHeaders.value().length <= 0)? headerStrings : staticLocalHeaders.value();
+            headers = (globalHeadersAnno == null || globalHeadersAnno.value() == null || globalHeadersAnno.value().length <= 0)?
+                    headers : globalHeadersAnno.value();
+
+            headers = (staticLocalHeadersAnno == null || staticLocalHeadersAnno.value() == null || staticLocalHeadersAnno.value().length <= 0)?
+                    headers : staticLocalHeadersAnno.value();
         }
 
-        if (headerStrings != null && headerStrings.length > 0)
+        if (headers != null && headers.length > 0)
         {
-            headers = new HashMap<>();
+            headersMap = new HashMap<>();
 
-            for (String str: headerStrings)
+            for (String str: headers)
             {
                 String[] keyValue = str.split("[:]", 2);     //拆分header的key和vaule
-                headers.put(keyValue[0].trim(), keyValue[1].trim());
+                headersMap.put(keyValue[0].trim(), keyValue[1].trim());
             }
         }
 
         HttpUrl httpUrl = new HttpUrl();
-        httpUrl.setHost(hostStr);
-        httpUrl.setPath(apiStr);
+        httpUrl.setHost(host);
+        httpUrl.setPath(api);
 
         Request request = new Request();
         request.setUrl(httpUrl);
-        request.setFields(map);
-        request.setHeaders(headers);
-        request.setRequestType(requestType.value());
+        request.setFields(fieldsMap);
+        request.setHeaders(headersMap);
+        request.setRequestType(requestType);
         request.setBodyContentType(contentType);
-        request.setTimeout(to);
+        request.setTimeout(timeout);
         request.setEnableCookies(enableCookies);
 
         Type returnType = method.getGenericReturnType();    //获取函数返回值类型type
@@ -183,11 +192,11 @@ public class RequestHandler
         http.setType(type);
         http.setRequest(request);
 
-        LogMelo.i("globalHost: "        + globalHost);
-        LogMelo.i("staticLocalHost: "   + staticLocalHost);
-        LogMelo.i("dynamicLocalHost: "  + dynamicLocalHost);
-        LogMelo.i("hostStr: "           + hostStr);
-        LogMelo.i("apiStr: "            + apiStr);
+        LogMelo.i("globalHost: "        + globalHostAnno);
+        LogMelo.i("staticLocalHost: "   + staticLocalHostAnno);
+        LogMelo.i("dynamicLocalHost: "  + dynamicLocalHostAnno);
+        LogMelo.i("host: "              + host);
+        LogMelo.i("api: "               + api);
         LogMelo.i("enableCookies: "     + enableCookies);
         LogMelo.i("contentType: "       + contentType);
 
