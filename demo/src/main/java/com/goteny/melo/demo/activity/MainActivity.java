@@ -41,14 +41,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onSuccess(List<GitHubIssue> response)
             {
-                LogMelo.i(getClass().getSimpleName(), "onSuccess(List<GitHubIssue> r): ");
+                LogMelo.i("onSuccess(List<GitHubIssue> r): ");
                 Toast.makeText(MainActivity.this, "onSuccess(List<GitHubIssue> r)", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(Throwable t)
             {
-                LogMelo.i(getClass().getSimpleName(), "onFailure(Throwable t): " + t, t);
+                LogMelo.i("onFailure(Throwable t): " + t, t);
                 Toast.makeText(MainActivity.this, "onFailure(Throwable t)", Toast.LENGTH_SHORT).show();
             }
         }).execute();
@@ -60,14 +60,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onSuccess(GitHubMain response)
             {
-                LogMelo.i(getClass().getSimpleName(), "onSuccess(List<GitHubMain> r): ");
+                LogMelo.i("onSuccess(List<GitHubMain> r): ");
                 Toast.makeText(MainActivity.this, "onSuccess(List<GitHubMain> r)", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(Throwable t)
             {
-                LogMelo.i(getClass().getSimpleName(), "onFailure(Throwable t): " + t, t);
+                LogMelo.i("onFailure(Throwable t): " + t, t);
                 Toast.makeText(MainActivity.this, "onFailure(Throwable t)", Toast.LENGTH_SHORT).show();
             }
         }).execute();

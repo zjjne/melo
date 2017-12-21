@@ -2,6 +2,7 @@ package com.goteny.melo.http;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.CallSuper;
 
 import com.google.gson.Gson;
 import com.goteny.melo.http.interfaces.CookieCallback;
@@ -28,6 +29,7 @@ public class BaseHttp<T> implements IHttpWithCookie<T>, CoreHttpCallback, CoreCo
     protected HttpCallback<T> httpCallback;
     protected Type type;
 
+    @CallSuper
     @Override
     public IHttpWithCookie<T> callback(HttpCallback<T> callback)
     {
@@ -35,6 +37,7 @@ public class BaseHttp<T> implements IHttpWithCookie<T>, CoreHttpCallback, CoreCo
         return this;
     }
 
+    @CallSuper
     @Override
     public IHttpWithCookie<T> callback(CookieCallback callback)
     {
@@ -42,6 +45,7 @@ public class BaseHttp<T> implements IHttpWithCookie<T>, CoreHttpCallback, CoreCo
         return this;
     }
 
+    @CallSuper
     @Override
     public void execute()
     {
@@ -58,6 +62,7 @@ public class BaseHttp<T> implements IHttpWithCookie<T>, CoreHttpCallback, CoreCo
 
         OkhttpUtil.getInstance().send(request, coreCallbakcs);
     }
+
 
     @Override
     public void onSuccess(String body)

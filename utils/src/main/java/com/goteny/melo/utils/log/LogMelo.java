@@ -274,7 +274,7 @@ public class LogMelo
     private static String getTraceInfo()
     {
         StackTraceElement stackTrace = Thread.currentThread().getStackTrace()[4];
-        String fileInfo = "[" + stackTrace.getFileName() + "(" + stackTrace.getLineNumber() + ") " + stackTrace.getMethodName() + "]-->  ";
+        String fileInfo = "[(" + stackTrace.getFileName() + ":" + stackTrace.getLineNumber() + ") #" + stackTrace.getMethodName() + "]-->  ";
         return fileInfo;
     }
 
