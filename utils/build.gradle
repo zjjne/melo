@@ -4,13 +4,13 @@ apply plugin: 'com.android.library'
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
-    publishNonDefault true      //发布多种aar，包括debug和release等
+//    publishNonDefault true      //发布多种aar，包括debug和release等
 
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 18090615
-        versionName "0.0.5"
+        versionCode 18090702
+        versionName "0.0.6"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 

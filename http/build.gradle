@@ -4,7 +4,7 @@ apply plugin: 'com.novoda.bintray-release'
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
-    publishNonDefault true      //发布多种aar，包括debug和release等
+//    publishNonDefault true      //发布多种aar，包括debug和release等
 
     defaultConfig {
         minSdkVersion 14
@@ -28,8 +28,7 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    releaseCompile project(path: ':utils', configuration: 'release')
-    debugCompile project(path: ':utils', configuration: 'debug')
+    compile project(':utils')
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.google.code.gson:gson:2.7'
     compile 'com.squareup.okhttp3:okhttp:3.9.0'
