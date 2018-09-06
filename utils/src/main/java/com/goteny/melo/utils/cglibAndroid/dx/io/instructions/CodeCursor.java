@@ -28,14 +28,14 @@ public interface CodeCursor {
      */
     public int cursor();
 
-    /**
-     * Gets the base address associated with the current cursor. This
-     * differs from the cursor value when explicitly set (by {@link
-     * #setBaseAddress). This is used, in particular, to convey base
-     * addresses to switch data payload instructions, whose relative
-     * addresses are relative to the address of a dependant switch
-     * instruction.
-     */
+//    /**
+//     * Gets the base address associated with the current cursor. This
+//     * differs from the cursor value when explicitly set (by {@link
+//     * #setBaseAddress). This is used, in particular, to convey base
+//     * addresses to switch data payload instructions, whose relative
+//     * addresses are relative to the address of a dependant switch
+//     * instruction.
+//     */
     public int baseAddressForCursor();
 
     /**

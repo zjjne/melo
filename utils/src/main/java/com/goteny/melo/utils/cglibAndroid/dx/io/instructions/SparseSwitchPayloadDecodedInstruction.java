@@ -46,7 +46,7 @@ public final class SparseSwitchPayloadDecodedInstruction
         this.targets = targets;
     }
 
-    /** @inheritDoc */
+
     public int getRegisterCount() {
         return 0;
     }
@@ -59,7 +59,7 @@ public final class SparseSwitchPayloadDecodedInstruction
         return targets;
     }
 
-    /** @inheritDoc */
+
     public DecodedInstruction withIndex(int newIndex) {
         throw new UnsupportedOperationException("no index in instruction");
     }

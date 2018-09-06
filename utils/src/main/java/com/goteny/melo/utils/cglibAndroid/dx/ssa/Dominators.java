@@ -20,26 +20,26 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashSet;
 
-/**
- * This class computes dominator and post-dominator information using the
- * Lengauer-Tarjan method.
- *
- * See A Fast Algorithm for Finding Dominators in a Flowgraph
- * T. Lengauer & R. Tarjan, ACM TOPLAS July 1979, pgs 121-141.
- *
- * This implementation runs in time O(n log n).  The time bound
- * could be changed to O(n * ack(n)) with a small change to the link and eval,
- * and an addition of a child field to the DFS info. In reality, the constant
- * overheads are high enough that the current method is faster in all but the
- * strangest artificially constructed examples.
- *
- * The basic idea behind this algorithm is to perform a DFS walk, keeping track
- * of various info about parents.  We then use this info to calculate the
- * dominators, using union-find structures to link together the DFS info,
- * then finally evaluate the union-find results to get the dominators.
- * This implementation is m log n because it does not perform union by
- * rank to keep the union-find tree balanced.
- */
+///**
+// * This class computes dominator and post-dominator information using the
+// * Lengauer-Tarjan method.
+// *
+// * See A Fast Algorithm for Finding Dominators in a Flowgraph
+// * T. Lengauer & R. Tarjan, ACM TOPLAS July 1979, pgs 121-141.
+// *
+// * This implementation runs in time O(n log n).  The time bound
+// * could be changed to O(n * ack(n)) with a small change to the link and eval,
+// * and an addition of a child field to the DFS info. In reality, the constant
+// * overheads are high enough that the current method is faster in all but the
+// * strangest artificially constructed examples.
+// *
+// * The basic idea behind this algorithm is to perform a DFS walk, keeping track
+// * of various info about parents.  We then use this info to calculate the
+// * dominators, using union-find structures to link together the DFS info,
+// * then finally evaluate the union-find results to get the dominators.
+// * This implementation is m log n because it does not perform union by
+// * rank to keep the union-find tree balanced.
+// */
 public final class Dominators {
     /* postdom is true if we want post dominators */
     private final boolean postdom;

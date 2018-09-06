@@ -50,7 +50,7 @@ import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.STATIC;
 
 /**
- * Generates a </i><strong>D</strong>alvik <strong>EX</strong>ecutable (dex)
+ * Generates a <strong>D</strong>alvik <strong>EX</strong>ecutable (dex)
  * file for execution on Android. Dex files define classes and interfaces,
  * including their member methods and fields, executable code, and debugging
  * information. They also define annotations, though this API currently has no

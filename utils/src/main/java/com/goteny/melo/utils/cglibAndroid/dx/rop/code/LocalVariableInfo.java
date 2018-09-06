@@ -181,7 +181,7 @@ public final class LocalVariableInfo
      * the result, it still needs to be passed in explicitly to this
      * method, since the spec that is stored here should always have a
      * simple type and the one in the instruction can be an arbitrary
-     * {@link TypeBearer} (such as a constant value).
+     * {TypeBearer} (such as a constant value).
      *
      * @param insn {@code non-null;} the instruction in question
      * @param spec {@code non-null;} the associated register spec

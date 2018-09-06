@@ -721,6 +721,7 @@ public final class Code {
      * bytes. The following numeric casts are supported:
      *
      * <p><table border="1">
+     * <caption></caption>
      * <tr><th>From</th><th>To</th></tr>
      * <tr><td>int</td><td>byte, char, short, long, float, double</td></tr>
      * <tr><td>long</td><td>int, float, double</td></tr>

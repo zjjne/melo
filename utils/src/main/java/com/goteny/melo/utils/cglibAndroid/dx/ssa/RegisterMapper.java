@@ -29,7 +29,7 @@ public abstract class RegisterMapper {
     /**
      * Gets the count of registers (really, the total register width, since
      * category width is counted) in the new namespace.
-     * @return >= 0 width of new namespace.
+     * @return ≥0 width of new namespace.
      */
     public abstract int getNewRegisterCount();
 

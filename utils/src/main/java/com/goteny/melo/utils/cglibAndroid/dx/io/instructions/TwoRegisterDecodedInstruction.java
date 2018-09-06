@@ -40,22 +40,22 @@ public final class TwoRegisterDecodedInstruction extends DecodedInstruction {
         this.b = b;
     }
 
-    /** @inheritDoc */
+
     public int getRegisterCount() {
         return 2;
     }
 
-    /** @inheritDoc */
+
     public int getA() {
         return a;
     }
 
-    /** @inheritDoc */
+
     public int getB() {
         return b;
     }
 
-    /** @inheritDoc */
+
     public DecodedInstruction withIndex(int newIndex) {
         return new TwoRegisterDecodedInstruction(
                 getFormat(), getOpcode(), newIndex, getIndexType(),
