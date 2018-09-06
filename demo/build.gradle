@@ -7,8 +7,8 @@ android {
         applicationId "com.goteny.melo.demo"
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 17122117
-        versionName "1.0.3"
+        versionCode 18090616
+        versionName "1.0.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

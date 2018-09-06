@@ -21,4 +21,4 @@ Is an android code util
 
 **use**
 
-    compile 'com.goteny.melo:utils:0.0.4'
+    compile 'com.goteny.melo:utils:0.0.5'
