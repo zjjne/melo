@@ -10,7 +10,7 @@ Is an android code util
 
 **use**
 
-	compile 'com.goteny.melo:http:0.2.6'
+	compile 'com.goteny.melo:http:0.2.7'
 
 
 

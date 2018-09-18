@@ -63,6 +63,9 @@ public class OkhttpUtil implements IHttpCore
             @Override
             public void saveFromResponse(HttpUrl url, List<Cookie> cookies)
             {
+                if (mCookieStore == null)
+                    return;
+
                 if (mCookieStore.isEnableCookies(url.toString()))
                 {
                     if (cookies != null && !cookies.isEmpty())
@@ -79,12 +82,13 @@ public class OkhttpUtil implements IHttpCore
             @Override
             public List<Cookie> loadForRequest(HttpUrl url)
             {
-                List<Cookie> cookies = null;
+                List<Cookie> cookies = new ArrayList<>();
+
+                if (mCookieStore == null)
+                    return cookies;
                 
                 if (mCookieStore.isEnableCookies(url.toString()))
                     cookies = mCookieStore.getCookies(url.host());
-                
-                if (cookies == null) cookies = new ArrayList<>();
                 
                 return cookies;
             }
